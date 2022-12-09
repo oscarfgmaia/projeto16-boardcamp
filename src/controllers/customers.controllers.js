@@ -24,3 +24,15 @@ export async function findAll(req, res) {
         res.status(500).send(error.message)
     }
 }
+
+export async function findById(req, res) {
+    const {id}= req.params;
+    try {
+        const customer = await connectionDb.query(`
+        SELECT * FROM customers WHERE id=$1;
+        `,[id]);
+        res.status(201).send(customer.rows[0]);
+    } catch (error) {
+        res.status(500).send(error.message)
+    }
+}
