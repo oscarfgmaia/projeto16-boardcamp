@@ -1,11 +1,14 @@
 import { connectionDb } from "../database/db.js"
 
 export async function create(req, res) {
-    const { name } = req.body;
+    const { name, image, stockTotal, categoryId, pricePerDay } = req.body;
     try {
         await connectionDb.query(`
-        INSERT INTO games (name) VALUES ($1);
-    `, [name])
+        INSERT INTO
+            games (name, image, "stockTotal","categoryId","pricePerDay") 
+        VALUES
+            ($1,$2,$3,$4,$5);
+    `, [name, image, stockTotal, categoryId, pricePerDay])
         res.sendStatus(201);
     } catch (error) {
         res.status(500).send(error.message)
