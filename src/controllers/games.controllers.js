@@ -16,7 +16,18 @@ export async function create(req, res) {
 }
 
 export async function findAll(req, res) {
+    const name = req.query.name;
     try {
+        if (name) {
+            const query = "SELECT * FROM games WHERE name ILIKE $1;"
+            const pattern = `${name}%`;
+            const gamesToBeFound = await connectionDb.query(query,[pattern]);
+            if(gamesToBeFound.rowCount>0){
+                return res.status(201).send(gamesToBeFound.rows);
+            }else{
+                return res.sendStatus(404);
+            }
+        }
         const games = await connectionDb.query(`
         SELECT * FROM games;
         `)
