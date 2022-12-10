@@ -15,7 +15,18 @@ export async function create(req, res) {
 }
 
 export async function findAll(req, res) {
-    try {
+        const cpf = req.query.cpf;
+        try {
+            if (cpf) {
+                const query = "SELECT * FROM customers WHERE cpf ILIKE $1;"
+                const pattern = `${cpf}%`;
+                const cpfToBeFound = await connectionDb.query(query,[pattern]);
+                if(cpfToBeFound.rowCount>0){
+                    return res.status(201).send(cpfToBeFound.rows);
+                }else{
+                    return res.sendStatus(404);
+                }
+            }
         const customers = await connectionDb.query(`
         SELECT * FROM customers;
         `)
@@ -31,6 +42,9 @@ export async function findById(req, res) {
         const customer = await connectionDb.query(`
         SELECT * FROM customers WHERE id=$1;
         `,[id]);
+        if(customer.rowCount===0){
+            return res.sendStatus(404)
+        }
         res.status(201).send(customer.rows[0]);
     } catch (error) {
         res.status(500).send(error.message)
