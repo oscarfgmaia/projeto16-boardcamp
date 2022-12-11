@@ -2,6 +2,12 @@ import { connectionDb } from "../database/db.js"
 export async function create(req, res) {
     const { name, phone, cpf, birthday } = req.body;
     try {
+        const alreadyExists = await connectionDb.query(`
+        SELECT * FROM customers WHERE cpf=$1;
+        `,[cpf])
+        if(alreadyExists.rowCount>0){
+            return res.sendStatus(409)
+        }
         await connectionDb.query(`
         INSERT INTO
             customers (name, phone, cpf, birthday)

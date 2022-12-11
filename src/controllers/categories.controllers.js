@@ -2,9 +2,6 @@ import { connectionDb } from "../database/db.js"
 
 export async function create(req, res) {
     const { name } = req.body;
-    if(!name){
-        return res.sendStatus(400)
-    }
     try {
         const alreadyExists = await connectionDb.query(`
         SELECT * FROM categories WHERE name=$1;
