@@ -1,6 +1,7 @@
 import { connectionDb } from "../database/db.js"
 
 export async function create(req, res) {
+    
     const { name, image, stockTotal, categoryId, pricePerDay } = req.body;
     try {
         const alreadyExists = await connectionDb.query(`
@@ -12,7 +13,7 @@ export async function create(req, res) {
 
 
         const categoryExists = await connectionDb.query(`
-        SELECT * FROM games WHERE "categoryId"=$1;
+        SELECT * FROM categories WHERE id=$1;
         `, [categoryId])
         if (categoryExists.rowCount === 0) {
             return res.sendStatus(400)
@@ -21,12 +22,11 @@ export async function create(req, res) {
         //visto que não há como adicionar pelo front
         //um jogo com categoria diferente das existentes.
 
-
-        const queryInserted = await connectionDb.query(`
-        INSERT INTO
-        games (name, image, "stockTotal","categoryId","pricePerDay") 
+        await connectionDb.query(`
+        INSERT INTO games
+            (name, image, "stockTotal", "categoryId", "pricePerDay") 
         VALUES
-        ($1,$2,$3,$4,$5);
+            ($1,$2,$3,$4,$5);
         `, [name, image, stockTotal, categoryId, pricePerDay])
         res.sendStatus(201);
     } catch (error) {
