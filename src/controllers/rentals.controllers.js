@@ -105,3 +105,24 @@ export async function findAll(req, res) {
         res.status(500).send(error.message)
     }
 } 
+
+export async function deleteById(req,res){
+    const {id} = req.params;
+    const rentalExists = await connectionDb.query(`
+        SELECT * FROM rentals WHERE id=$1
+    `,[id]);
+    if(rentalExists.rowCount===0){
+        return res.sendStatus(404);
+    }
+    if(rentalExists.rowCount>0){
+        const returnDateFilled = rentalExists.rows[0].returnDate;
+        console.log(returnDateFilled)
+        if(!returnDateFilled){
+            return res.sendStatus(400);
+        }
+    }
+    await connectionDb.query(`
+    DELETE FROM rentals WHERE id=$1
+    `,[id])
+    res.sendStatus(200);
+}
