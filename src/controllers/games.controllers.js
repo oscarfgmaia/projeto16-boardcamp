@@ -28,7 +28,6 @@ export async function create(req, res) {
         VALUES
         ($1,$2,$3,$4,$5);
         `, [name, image, stockTotal, categoryId, pricePerDay])
-        console.log(queryInserted)
         res.sendStatus(201);
     } catch (error) {
         res.status(500).send(error.message)

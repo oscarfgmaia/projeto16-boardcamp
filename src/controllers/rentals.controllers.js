@@ -24,7 +24,7 @@ export async function create(req, res) {
         INSERT INTO rentals
             ("customerId","gameId","daysRented","rentDate","returnDate","delayFee","originalPrice")
         VALUES
-            ($1,$2,$3,'2022-12-10',null,null,$4);
+            ($1,$2,$3,now()::date,null,null,$4);
     `, [customerId, gameId, daysRented, priceOfGameToBeRented * daysRented])
         res.sendStatus(201);
     } catch (error) {
@@ -116,7 +116,6 @@ export async function deleteById(req, res) {
     }
     if (rentalExists.rowCount > 0) {
         const returnDateFilled = rentalExists.rows[0].returnDate;
-        console.log(returnDateFilled)
         if (!returnDateFilled) {
             return res.sendStatus(400);
         }
@@ -130,17 +129,28 @@ export async function deleteById(req, res) {
 export async function returnRental(req, res) {
     const { id } = req.params;
     const rentalExists = await connectionDb.query(`
-        SELECT * FROM rentals WHERE id=$1
+    SELECT *,now()::date - "rentDate" as diff FROM rentals
+    JOIN games
+    ON rentals."gameId" = games.id
+    WHERE rentals.id=$1
     `, [id]);
     if (rentalExists.rowCount === 0) {
         return res.sendStatus(404);
     }
     if (rentalExists.rowCount > 0) {
         const returnDateFilled = rentalExists.rows[0].returnDate;
-        console.log(returnDateFilled)
         if (returnDateFilled) {
             return res.sendStatus(400);
         }
+    }
+    const pricePerDay = rentalExists.rows[0].pricePerDay;
+    const diffDays = rentalExists.rows[0].diff;
+    if (diffDays > rentalExists.rows[0].daysRented) {
+        const delayDays = diffDays - rentalExists.rows[0].daysRented;
+        await connectionDb.query(`
+        UPDATE rentals SET "returnDate"=now()::date,"delayFee"=$2 WHERE id=$1;
+        `,[id,delayDays*pricePerDay])
+        return res.sendStatus(200);
     }
     await connectionDb.query(`
     UPDATE rentals SET "returnDate"=now()::date WHERE id=$1;
