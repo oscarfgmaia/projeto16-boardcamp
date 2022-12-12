@@ -1,0 +1,19 @@
+
+    id: r.id,
+    customerId: r.customerId,
+    gameId: r.gameId,
+    rentDate: r.rentDate,
+    daysRented: r.daysRented,
+    returnDate: r.returnDate,
+    originalPrice: r.originalPrice,
+    delayFee: r.delayFee,
+    customer: {
+     id: r.customerId,
+     name: 'João Alfredo'
+    },
+    game: {
+      id: 1,
+      name: 'Banco Imobiliário',
+      categoryId: 1,
+      categoryName: 'Estratégia'
+    }
