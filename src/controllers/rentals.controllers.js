@@ -2,7 +2,7 @@ import { connectionDb } from "../database/db.js"
 
 export async function create(req, res) {
     const { customerId, gameId, daysRented } = req.body;
-    if(daysRented<=0){
+    if (daysRented <= 0) {
         return res.sendStatus(400);
     }
     try {
@@ -34,17 +34,31 @@ export async function create(req, res) {
 
 export async function findAll(req, res) {
     const { customerId, gameId } = req.query;
+    let rentals =[];
     try {
-        const rentals = await connectionDb.query(`
-        SELECT *,c.name as customer_name,g.name as g_name,categories.name as category_name
+        if (customerId || gameId) {
+            rentals = await connectionDb.query(`
+            SELECT rentals.*,c.name as customer_name,g.name as g_name,categories.name as category_name
         FROM rentals
         LEFT JOIN customers c
         ON rentals."customerId" = c.id
         LEFT JOIN games g
         ON rentals."gameId" = g.id
         LEFT JOIN categories
-        ON g."categoryId"=categories.id WHERE "customerId"=$1 OR "gameId"=$2;
+        ON g."categoryId"=categories.id WHERE "customerId"=$1 OR g.id=$2;
         `, [customerId, gameId])
+        } else {
+            rentals = await connectionDb.query(`
+            SELECT rentals.*,c.name as customer_name,g.name as g_name,categories.name as category_name
+        FROM rentals
+        LEFT JOIN customers c
+        ON rentals."customerId" = c.id
+        LEFT JOIN games g
+        ON rentals."gameId" = g.id
+        LEFT JOIN categories
+        ON g."categoryId"=categories.id;
+        `,)
+        }
         //RETURN QUERY AS JSON FORMAT row_to_json
         // const rentals = await connectionDb.query(`
         // select row_to_json(t)
