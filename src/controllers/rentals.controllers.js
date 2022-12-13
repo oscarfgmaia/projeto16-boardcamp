@@ -6,7 +6,6 @@ export async function create(req, res) {
         return res.sendStatus(400);
     }
     try {
-        //todo change fixed price
         const gameToBeRented = await connectionDb.query(`
             SELECT * FROM games WHERE id=$1;
         `, [gameId])
